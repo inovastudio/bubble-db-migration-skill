@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "description": "Skills and CLI tools for migrating a Bubble.io app to your own stack: database, workflows, UI, files, and auth.",
   "author": { "name": "Inova Studio", "url": "https://github.com/inovastudio" },
-  "homepage": "https://github.com/inovastudio/bubble-db-migration-skill",
-  "repository": "https://github.com/inovastudio/bubble-db-migration-skill",
+  "homepage": "https://github.com/inovastudio/bubble-migration-kit",
+  "repository": "https://github.com/inovastudio/bubble-migration-kit",
   "license": "MIT",
   "keywords": ["bubble", "bubble.io", "migration", "postgres", "supabase", "etl"]
 }

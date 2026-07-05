@@ -15,7 +15,7 @@ The kit has three pillars:
 **As a Claude Code plugin** (skills + tools in one step):
 
 ```
-/plugin marketplace add inovastudio/bubble-db-migration-skill
+/plugin marketplace add inovastudio/bubble-migration-kit
 /plugin install bubble-migration-kit@bubble-migration
 ```
 
