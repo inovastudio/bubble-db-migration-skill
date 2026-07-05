@@ -4,7 +4,7 @@ description: Architecture and methodology for migrating a Bubble.io application'
 license: MIT
 metadata:
   author: inovastudio
-  version: "1.0.0"
+  version: "1.2.0"
 ---
 
 # Bubble Database Migration (Data API → Relational DB)
@@ -23,7 +23,7 @@ Every design decision below follows from what the Data API does and does not pro
 - **No deletion tombstones**: deleted records are invisible to delta queries. Deletion detection requires a separate ID-sweep reconciliation.
 - **References**: stored as Bubble unique IDs (format like `1699999999999x123456789012345678`). Resolvable, but integrity must be enforced at load time.
 - **Option sets**: returned as display values only; the option set definition itself is not exposed.
-- **Files/images**: returned as URLs (usually Bubble's S3/CDN). Asset migration is a separate optional stage.
+- **Files/images**: returned as URLs (usually Bubble's S3/CDN). Asset migration is a separate optional stage, covered by the `bubble-files-migration` skill.
 
 ## 2. Pipeline Architecture
 
@@ -85,14 +85,14 @@ Per record, against staged NDJSON:
 2. Pass reference IDs through unchanged, but log every referenced ID to a **dangling-reference ledger**. References to records never returned (privacy-hidden, deleted, unexposed type) get resolved per policy: null out, keep with FK disabled, or fail.
 3. Explode list-of-Things fields into junction rows with position.
 4. Accumulate distinct option-set values into lookup tables.
-5. Append file/image URLs to an asset manifest for the optional asset-sync stage.
+5. Append file/image URLs to an asset manifest for the optional asset-sync stage (consumed by the `bubble-files-migration` skill).
 6. Route unknown/unexpected fields (schema drift mid-run) into an `_extra JSONB` column rather than failing; schema is snapshotted at plan time.
 
 ## 6. Stage 4 — Load
 
 - Bulk-load initial migration via the target's fastest path (e.g., Postgres `COPY`); use upserts keyed on `_id` for incremental sync.
 - Load order: base tables (FKs deferred) → junction tables → validate dangling references → apply FK constraints last.
-- Target-specific extras where relevant (e.g., Supabase: RLS policy scaffolding as a starting point for re-implementing Bubble privacy rules, Storage as the asset target).
+- Target-specific extras where relevant (e.g., Supabase: RLS policy scaffolding as a starting point for re-implementing Bubble privacy rules — full methodology in the `bubble-auth-migration` skill — and Storage as the asset target).
 
 ## 7. Incremental Sync
 
@@ -127,3 +127,5 @@ Always assess these when designing or reviewing a Bubble migration:
 - If the user wants **ongoing sync / gradual migration**: full pipeline plus section 7; deletion reconciliation is not optional.
 - If the user asks **schema-mapping questions only**: use sections 3 and 9.
 - Always produce a reviewable migration plan (schema + DDL + WU estimate) before any extraction begins, and get user confirmation.
+- For migrating workflows, UI, files, or auth/privacy rules, see the sibling skills in this collection: `bubble-workflows-migration`, `bubble-ui-rebuild`, `bubble-files-migration`, `bubble-auth-migration`.
+- **Reference implementation**: a zero-dependency Node CLI implementing stages 1–2, incremental sync, and deletion sweeps ships with this skill's repository: https://github.com/inovastudio/bubble-db-migration-skill/tree/main/tools/bubble-export (if this skill was installed as the `bubble-migration-kit` plugin, it is already on disk under the plugin's `tools/` directory). Prefer running or adapting it over reimplementing extraction from scratch.

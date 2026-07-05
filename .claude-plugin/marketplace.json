@@ -1,0 +1,12 @@
+{
+  "name": "bubble-migration",
+  "description": "Bubble.io migration kit: skills and CLI tools for moving a Bubble app to your own stack.",
+  "owner": { "name": "Inova Studio" },
+  "plugins": [
+    {
+      "name": "bubble-migration-kit",
+      "source": "./",
+      "description": "All five Bubble migration skills plus runnable export/asset/load CLI tools."
+    }
+  ]
+}
